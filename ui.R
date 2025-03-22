@@ -27,7 +27,7 @@ login_page <- fluidPage(
 )
 
 # Tela de criação de conta
-create_account_page <- fluidPage(
+create_account_page <<- fluidPage(
   id = "create_account_page",
   useShinyjs(),
   tags$head(
