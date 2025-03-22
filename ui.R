@@ -50,7 +50,7 @@ create_account_page <- fluidPage(
 )
 
 # Cabeçalho do dashboard
-mainHeader <- dashboardHeader(
+mainHeader <<- dashboardHeader(
   title = "Gerenciamento de Viagens", titleWidth = 250,
   tags$li(class = "dropdown", 
           style = "padding: 8px;",
@@ -58,7 +58,7 @@ mainHeader <- dashboardHeader(
 )
 
 # Barra lateral do dashboard
-mainSidebar <- dashboardSidebar(
+mainSidebar <<- dashboardSidebar(
   useShinyjs(),
   useShinyalert(),
   sidebarMenu(id = "menu",
@@ -70,7 +70,7 @@ mainSidebar <- dashboardSidebar(
 )
 
 # Corpo principal do dashboard
-mainBody <- dashboardBody(
+mainBody <<- dashboardBody(
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
   ),
@@ -112,4 +112,4 @@ mainBody <- dashboardBody(
 )
 
 # Definição da interface
-ui <- uiOutput("app_ui")
+ui <<- uiOutput("app_ui")
