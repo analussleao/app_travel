@@ -1,5 +1,25 @@
+library(shiny)
+library(DT)
+
+# Caminho do arquivo de dados de usuários
+user_data_file <- "user_data.csv"
+
+# Carrega ou inicializa os dados de usuários
+if (file.exists(user_data_file)) {
+  user_credentials <- read.csv(user_data_file, stringsAsFactors = FALSE)
+} else {
+  user_credentials <- data.frame(
+    username = c("admin"),
+    password = c("123456"),
+    name = c("Administrador"),
+    role = c("admin"),
+    stringsAsFactors = FALSE
+  )
+  write.csv(user_credentials, user_data_file, row.names = FALSE)
+}
+
 server <- function(input, output, session) {
-  # Estado do usuário (login, página atual, etc.)
+  # Estado do usuário
   user_data <- reactiveValues(logged_in = FALSE, user_info = NULL, page = "login")
   
   # Função de autenticação
@@ -30,7 +50,7 @@ server <- function(input, output, session) {
     return(TRUE)
   }
   
-  # Ações ao clicar no botão de login
+  # Ações de login
   observeEvent(input$login_button, {
     user <- authenticate_user(input$username, input$password)
     if (!is.null(user)) {
@@ -43,13 +63,13 @@ server <- function(input, output, session) {
     }
   })
   
-  # Ações ao clicar no botão de logout
+  # Ações de logout
   observeEvent(input$logout_button, {
     user_data$logged_in <- FALSE
     user_data$page <- "login"
   })
   
-  # Ações ao clicar no botão de criar conta
+  # Criar conta
   observeEvent(input$create_account_button, {
     success <- create_account(input$new_username, input$new_password, input$new_name)
     output$create_account_message <- renderText({
@@ -61,17 +81,16 @@ server <- function(input, output, session) {
     })
   })
   
-  # Navegação para tela de criação de conta
+  # Navegação
   observeEvent(input$create_account_link, {
     user_data$page <- "create_account"
   })
   
-  # Navegação para tela de login
   observeEvent(input$back_to_login, {
     user_data$page <- "login"
   })
   
-  # Definição de interface do usuário dinamicamente
+  # Renderizar UI
   output$app_ui <- renderUI({
     if (user_data$logged_in) {
       dashboardPage(mainHeader, mainSidebar, mainBody)
@@ -82,7 +101,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # Renderização da tabela de reservas
+  # Renderizar tabela de reservas
   output$tabela_reservas <- renderDT({
     datatable(
       data.frame(
@@ -106,7 +125,7 @@ server <- function(input, output, session) {
       )
   })
   
-  # Renderização do gráfico de relatórios
+  # Renderizar gráfico de relatórios
   output$grafico_relatorio <- renderPlot({
     barplot(
       c(10, 20, 15),
