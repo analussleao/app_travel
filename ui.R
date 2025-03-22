@@ -49,13 +49,17 @@ create_account_page <- fluidPage(
   )
 )
 
-# Cabeçalho do dashboard
 mainHeader <<- dashboardHeader(
-  title = "Luneta Viagens", titleWidth = 250,
+  title = tags$div(
+    tags$img(src = "luneta.png", height = "50px", style = "margin-right: 10px;"), # Imagem da luneta
+    "Luneta Viagens"
+  ),
+  titleWidth = 250,
   tags$li(class = "dropdown", 
           style = "padding: 8px;",
           actionButton("logout_button", "Logout", icon = icon("sign-out"), class = "btn-logout"))
 )
+
 
 # Barra lateral do dashboard
 mainSidebar <<- dashboardSidebar(
