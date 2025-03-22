@@ -51,7 +51,7 @@ create_account_page <- fluidPage(
 
 # Cabeçalho do dashboard
 mainHeader <<- dashboardHeader(
-  title = "Gerenciamento de Viagens", titleWidth = 250,
+  title = "Luneta Viagens", titleWidth = 250,
   tags$li(class = "dropdown", 
           style = "padding: 8px;",
           actionButton("logout_button", "Logout", icon = icon("sign-out"), class = "btn-logout"))
