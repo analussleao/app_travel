@@ -121,17 +121,10 @@ server <- function(input, output, session) {
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   })
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
   
   # Renderiza a tabela de reservas
   output$tabela_reservas <- renderDT({
     datatable(relatorio_data(), options = list(pageLength = 5, autoWidth = TRUE),
               class = "display compact", rownames = FALSE)
   })
->>>>>>> Stashed changes
 }
-=======
-}
->>>>>>> e7268d2025c85d750ca73e6651e8762324bf8546
