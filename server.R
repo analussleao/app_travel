@@ -121,6 +121,7 @@ server <- function(input, output, session) {
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   })
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
   
@@ -131,3 +132,6 @@ server <- function(input, output, session) {
   })
 >>>>>>> Stashed changes
 }
+=======
+}
+>>>>>>> e7268d2025c85d750ca73e6651e8762324bf8546
