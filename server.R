@@ -81,7 +81,7 @@ server <- function(input, output, session) {
     })
   })
   
-  # Navegação
+  
   observeEvent(input$create_account_link, {
     user_data$page <- "create_account"
   })
