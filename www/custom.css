@@ -77,10 +77,7 @@ body {
 /* Texto */
 h3, h4, h5, p, label {
   color: #227C9D;
-<<<<<<< HEAD
-}
-<<<<<<< Updated upstream
-=======
+
 /* Estilo para o título centralizado no tabItem */
 .tab-relatorios-title {
   color: #227C9D;
@@ -114,7 +111,4 @@ h3, h4, h5, p, label {
   color: #FE6D73;
   font-weight: bold;
 }
->>>>>>> Stashed changes
-=======
-}
->>>>>>> e7268d2025c85d750ca73e6651e8762324bf8546
+

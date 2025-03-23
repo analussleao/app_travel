@@ -107,13 +107,24 @@ mainBody <<- dashboardBody(
     ),
     tabItem(
       tabName = "relatorios",
+      
+      # Título principal
       h4("Relatórios de Viagens", class = "tab-relatorios-title"),
+      
       br(),
+      
+      # Primeira linha de boxes
       fluidRow(
         box(
-          title = "Upload de Relatórios", width = 6, solidHeader = TRUE,
+          title = "Upload de Relatórios",
+          width = 6,
+          solidHeader = TRUE,
           class = "tab-relatorios-box",
+          
+          # Instruções de upload
           p("Faça o upload de arquivos CSV contendo os dados das viagens e vendas."),
+          
+          # Campo de upload de arquivo
           fileInput(
             "relatorio_file", 
             "Selecione o arquivo:", 
@@ -121,28 +132,44 @@ mainBody <<- dashboardBody(
             buttonLabel = "Procurar", 
             placeholder = "Nenhum arquivo selecionado"
           ),
+          
+          # Botão de ação
           actionButton(
             "processar_relatorio", 
             "Processar Relatório", 
             class = "tab-relatorios-button"
           ),
+          
           br(),
+          
+          # Mensagem de upload
           div(
             textOutput("upload_message"),
             class = "tab-relatorios-alert"
           )
         ),
+        
         box(
-          title = "Tabela de Relatórios", width = 6, solidHeader = TRUE,
+          title = "Gráfico de Relatórios",
+          width = 6,
+          solidHeader = TRUE,
           class = "tab-relatorios-box",
-          DTOutput("tabela_reservas")
+          
+          # Gráfico com tamanho padronizado
+          plotOutput("grafico_relatorio", width = "100%", height = "250px")
         )
       ),
+      
+      # Segunda linha de boxes
       fluidRow(
         box(
-          title = "Gráfico de Relatórios", width = 12, solidHeader = TRUE,
+          title = "Tabela de Relatórios",
+          width = 12,
+          solidHeader = TRUE,
           class = "tab-relatorios-box",
-          plotOutput("grafico_relatorio")
+          
+          # Tabela de relatórios
+          DTOutput("tabela_reservas")
         )
       )
     )

@@ -19,12 +19,17 @@ if (file.exists(user_data_file)) {
   write.csv(user_credentials, user_data_file, row.names = FALSE)
 }
 
-# Função para carregar arquivos da pasta "relatorios"
+# Função para carregar e consolidar arquivos da pasta "relatorios"
 carregar_relatorios <- function(pasta_relatorios) {
   if (!dir.exists(pasta_relatorios)) dir.create(pasta_relatorios)
   arquivos <- list.files(pasta_relatorios, pattern = "\\.csv$", full.names = TRUE)
   if (length(arquivos) == 0) return(data.frame())
-  do.call(rbind, lapply(arquivos, read.csv, stringsAsFactors = FALSE))
+  dados <- do.call(rbind, lapply(arquivos, function(arquivo) {
+    df <- read.csv(arquivo, stringsAsFactors = FALSE)
+    df$Ano <- as.numeric(sub(".*_(\\d{4})\\.csv$", "\\1", basename(arquivo))) # Adicionar coluna 'Ano' com base no nome do arquivo
+    df
+  }))
+  return(dados)
 }
 
 server <- function(input, output, session) {
@@ -109,15 +114,24 @@ server <- function(input, output, session) {
     })
   })
   
-  # Renderiza o gráfico de relatórios
+  # Renderiza o gráfico de relatórios mostrando o total de viagens realizadas por ano
   output$grafico_relatorio <- renderPlot({
     req(relatorio_data())
     dados <- relatorio_data()
-    resumo <- aggregate(Custo ~ Status, data = dados, sum)
-    ggplot(resumo, aes(x = Status, y = Custo, fill = Status)) +
+    if (nrow(dados) == 0) return(NULL)
+    
+    # Filtrar apenas as viagens realizadas
+    viagens_realizadas <- subset(dados, Status == "Confirmado") # Substitua "Realizada" pelo valor correto na sua base de dados
+    
+    # Contar o número de viagens realizadas por ano
+    resumo <- aggregate(. ~ Ano, data = viagens_realizadas, FUN = length) # Contar número de linhas por ano
+    
+    
+    ggplot(resumo, aes(x = Ano, y = Status)) +
       geom_bar(stat = "identity") +
-      labs(title = "Comparação de Custos por Status das Viagens",
-           x = "Status da Viagem", y = "Custo Total (R$)") +
+      
+      labs(title = "Total de Viagens Realizadas por Ano",
+           x = "Ano", y = "Total de Viagens") +
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   })
