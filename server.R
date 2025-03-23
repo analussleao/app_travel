@@ -1,3 +1,4 @@
+# Carregando pacotes necessários
 library(shiny)
 library(DT)
 library(ggplot2)
@@ -23,20 +24,25 @@ if (file.exists(user_data_file)) {
 carregar_relatorios <- function(pasta_relatorios) {
   if (!dir.exists(pasta_relatorios)) dir.create(pasta_relatorios)
   arquivos <- list.files(pasta_relatorios, pattern = "\\.csv$", full.names = TRUE)
+  
   if (length(arquivos) == 0) return(data.frame())
+  
   dados <- do.call(rbind, lapply(arquivos, function(arquivo) {
     df <- read.csv(arquivo, stringsAsFactors = FALSE)
-    df$Ano <- as.numeric(sub(".*_(\\d{4})\\.csv$", "\\1", basename(arquivo))) # Adicionar coluna 'Ano' com base no nome do arquivo
+    df$Ano <- as.numeric(sub(".*_(\\d{4})\\.csv$", "\\1", basename(arquivo))) # Extrair ano do nome do arquivo
     df
   }))
+  
   return(dados)
 }
 
+# Servidor
 server <- function(input, output, session) {
+  
   # Estado do usuário
   user_data <- reactiveValues(logged_in = FALSE, user_info = NULL, page = "login")
   
-  # Reactive para armazenar os dados do arquivo carregado
+  # Dados do relatório carregado
   relatorio_data <- reactiveVal(data.frame())
   
   # Carregar relatórios ao iniciar o aplicativo
@@ -44,18 +50,20 @@ server <- function(input, output, session) {
   
   # Função de autenticação
   authenticate_user <- function(username, password) {
-    user <- user_credentials[user_credentials$username == username &
-                               user_credentials$password == password, ]
-    if (nrow(user) == 1) return(user) else return(NULL)
+    user <- user_credentials[user_credentials$username == username & user_credentials$password == password, ]
+    if (nrow(user) == 1) return(user)
+    else return(NULL)
   }
   
   # Função para criar conta
   create_account <- function(username, password, name) {
     if (username %in% user_credentials$username) return(FALSE)
+    
     new_user <- data.frame(username, password, name, role = "user", stringsAsFactors = FALSE)
     user_credentials <<- rbind(user_credentials, new_user)
     write.csv(user_credentials, user_data_file, row.names = FALSE)
-    TRUE
+    
+    return(TRUE)
   }
   
   # Ações de login
@@ -101,6 +109,7 @@ server <- function(input, output, session) {
     tryCatch({
       pasta_relatorios <- "relatorios"
       if (!dir.exists(pasta_relatorios)) dir.create(pasta_relatorios)
+      
       caminho_arquivo <- file.path(pasta_relatorios, input$relatorio_file$name)
       if (file.copy(input$relatorio_file$datapath, caminho_arquivo)) {
         dados <- read.csv(caminho_arquivo, stringsAsFactors = FALSE)
@@ -114,31 +123,29 @@ server <- function(input, output, session) {
     })
   })
   
-  # Renderiza o gráfico de relatórios mostrando o total de viagens realizadas por ano
+  # Renderizar gráfico de relatórios
   output$grafico_relatorio <- renderPlot({
     req(relatorio_data())
     dados <- relatorio_data()
     if (nrow(dados) == 0) return(NULL)
     
-    # Filtrar apenas as viagens realizadas
-    viagens_realizadas <- subset(dados, Status == "Confirmado") # Substitua "Realizada" pelo valor correto na sua base de dados
-    
-    # Contar o número de viagens realizadas por ano
+    viagens_realizadas <- subset(dados, Status == "Confirmado") # Ajuste "Confirmado" conforme os dados
     resumo <- aggregate(. ~ Ano, data = viagens_realizadas, FUN = length) # Contar número de linhas por ano
-    
     
     ggplot(resumo, aes(x = Ano, y = Status)) +
       geom_bar(stat = "identity") +
-      
-      labs(title = "Total de Viagens Realizadas por Ano",
-           x = "Ano", y = "Total de Viagens") +
+      labs(title = "Total de Viagens Realizadas por Ano", x = "Ano", y = "Total de Viagens") +
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   })
   
-  # Renderiza a tabela de reservas
+  # Renderizar tabela de reservas
   output$tabela_reservas <- renderDT({
-    datatable(relatorio_data(), options = list(pageLength = 5, autoWidth = TRUE),
-              class = "display compact", rownames = FALSE)
+    datatable(
+      relatorio_data(),
+      options = list(pageLength = 5, autoWidth = TRUE),
+      class = "display compact",
+      rownames = FALSE
+    )
   })
 }
