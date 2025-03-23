@@ -78,3 +78,39 @@ body {
 h3, h4, h5, p, label {
   color: #227C9D;
 }
+<<<<<<< Updated upstream
+=======
+/* Estilo para o título centralizado no tabItem */
+.tab-relatorios-title {
+  color: #227C9D;
+  text-align: center;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+/* Estilo para os boxes */
+.tab-relatorios-box {
+  background-color: #FEF9EF;
+  border: 1px solid #FFCB77;
+  color: #227C9D;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+/* Estilo para o botão de ação */
+.tab-relatorios-button {
+  background-color: #227C9D;
+  border-color: #227C9D;
+  color: #FFFFFF;
+}
+
+.tab-relatorios-button:hover {
+  background-color: #17C3B2;
+  border-color: #17C3B2;
+}
+
+.tab-relatorios-alert {
+  color: #FE6D73;
+  font-weight: bold;
+}
+>>>>>>> Stashed changes

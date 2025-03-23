@@ -1,5 +1,6 @@
 library(shiny)
 library(DT)
+library(ggplot2)
 
 # Caminho do arquivo de dados de usuários
 user_data_file <- "user_data.csv"
@@ -9,45 +10,47 @@ if (file.exists(user_data_file)) {
   user_credentials <- read.csv(user_data_file, stringsAsFactors = FALSE)
 } else {
   user_credentials <- data.frame(
-    username = c("admin"),
-    password = c("123456"),
-    name = c("Administrador"),
-    role = c("admin"),
+    username = "admin",
+    password = "123456",
+    name = "Administrador",
+    role = "admin",
     stringsAsFactors = FALSE
   )
   write.csv(user_credentials, user_data_file, row.names = FALSE)
+}
+
+# Função para carregar arquivos da pasta "relatorios"
+carregar_relatorios <- function(pasta_relatorios) {
+  if (!dir.exists(pasta_relatorios)) dir.create(pasta_relatorios)
+  arquivos <- list.files(pasta_relatorios, pattern = "\\.csv$", full.names = TRUE)
+  if (length(arquivos) == 0) return(data.frame())
+  do.call(rbind, lapply(arquivos, read.csv, stringsAsFactors = FALSE))
 }
 
 server <- function(input, output, session) {
   # Estado do usuário
   user_data <- reactiveValues(logged_in = FALSE, user_info = NULL, page = "login")
   
+  # Reactive para armazenar os dados do arquivo carregado
+  relatorio_data <- reactiveVal(data.frame())
+  
+  # Carregar relatórios ao iniciar o aplicativo
+  relatorio_data(carregar_relatorios("relatorios"))
+  
   # Função de autenticação
   authenticate_user <- function(username, password) {
     user <- user_credentials[user_credentials$username == username &
                                user_credentials$password == password, ]
-    if (nrow(user) == 1) {
-      return(user)
-    } else {
-      return(NULL)
-    }
+    if (nrow(user) == 1) return(user) else return(NULL)
   }
   
   # Função para criar conta
   create_account <- function(username, password, name) {
-    if (username %in% user_credentials$username) {
-      return(FALSE)
-    }
-    new_user <- data.frame(
-      username = username,
-      password = password,
-      name = name,
-      role = "user",
-      stringsAsFactors = FALSE
-    )
+    if (username %in% user_credentials$username) return(FALSE)
+    new_user <- data.frame(username, password, name, role = "user", stringsAsFactors = FALSE)
     user_credentials <<- rbind(user_credentials, new_user)
     write.csv(user_credentials, user_data_file, row.names = FALSE)
-    return(TRUE)
+    TRUE
   }
   
   # Ações de login
@@ -57,9 +60,7 @@ server <- function(input, output, session) {
       user_data$logged_in <- TRUE
       user_data$user_info <- user
     } else {
-      output$login_message <- renderText({
-        "Usuário ou senha inválidos."
-      })
+      output$login_message <- renderText("Usuário ou senha inválidos.")
     }
   })
   
@@ -72,73 +73,61 @@ server <- function(input, output, session) {
   # Criar conta
   observeEvent(input$create_account_button, {
     success <- create_account(input$new_username, input$new_password, input$new_name)
-    output$create_account_message <- renderText({
-      if (success) {
-        "Conta criada com sucesso! Volte para a tela de login."
-      } else {
-        "Erro: Nome de usuário já existe."
-      }
-    })
+    output$create_account_message <- renderText(
+      if (success) "Conta criada com sucesso! Volte para a tela de login."
+      else "Erro: Nome de usuário já existe."
+    )
   })
   
   # Navegação
-  observeEvent(input$create_account_link, {
-    user_data$page <- "create_account"
-  })
-  
-  observeEvent(input$back_to_login, {
-    user_data$page <- "login"
-  })
+  observeEvent(input$create_account_link, { user_data$page <- "create_account" })
+  observeEvent(input$back_to_login, { user_data$page <- "login" })
   
   # Renderizar UI
   output$app_ui <- renderUI({
-    if (user_data$logged_in) {
-      dashboardPage(mainHeader, mainSidebar, mainBody)
-    } else if (user_data$page == "login") {
-      login_page
-    } else if (user_data$page == "create_account") {
-      create_account_page
-    }
+    if (user_data$logged_in) dashboardPage(mainHeader, mainSidebar, mainBody)
+    else if (user_data$page == "login") login_page
+    else if (user_data$page == "create_account") create_account_page
   })
   
-  # Renderizar tabela de reservas
-  output$tabela_reservas <- renderDT({
-    datatable(
-      data.frame(
-        Destino = c("Rio de Janeiro", "Paris", "Tóquio"),
-        Data = c("2023-12-01", "2024-01-15", "2024-03-10"),
-        Status = c("Confirmado", "Pendente", "Cancelado")
-      ),
-      options = list(
-        pageLength = 5,
-        dom = "t",
-        autoWidth = TRUE
-      ),
-      class = "display compact",
-      rownames = FALSE
-    ) %>%
-      formatStyle(
-        columns = c("Destino", "Data", "Status"),
-        color = "#227C9D",
-        backgroundColor = "#FEF9EF",
-        fontWeight = "bold"
-      )
+  # Processar o arquivo de upload
+  observeEvent(input$processar_relatorio, {
+    req(input$relatorio_file)
+    tryCatch({
+      pasta_relatorios <- "relatorios"
+      if (!dir.exists(pasta_relatorios)) dir.create(pasta_relatorios)
+      caminho_arquivo <- file.path(pasta_relatorios, input$relatorio_file$name)
+      if (file.copy(input$relatorio_file$datapath, caminho_arquivo)) {
+        dados <- read.csv(caminho_arquivo, stringsAsFactors = FALSE)
+        relatorio_data(dados)
+        showNotification(paste("Arquivo carregado e salvo em:", caminho_arquivo), type = "message")
+      } else {
+        showNotification("Erro ao salvar o arquivo. Verifique as permissões.", type = "error")
+      }
+    }, error = function(e) {
+      showNotification("Erro ao carregar o arquivo. Verifique o formato do CSV.", type = "error")
+    })
   })
   
-  # Renderizar gráfico de relatórios
+  # Renderiza o gráfico de relatórios
   output$grafico_relatorio <- renderPlot({
-    barplot(
-      c(10, 20, 15),
-      names.arg = c("2022", "2023", "2024"),
-      col = "#17C3B2",
-      border = "#FFCB77",
-      main = "Relatórios de Viagens por Ano",
-      xlab = "Ano",
-      ylab = "Número de Viagens",
-      cex.main = 1.5,
-      cex.lab = 1.2,
-      cex.axis = 1,
-      las = 1
-    )
+    req(relatorio_data())
+    dados <- relatorio_data()
+    resumo <- aggregate(Custo ~ Status, data = dados, sum)
+    ggplot(resumo, aes(x = Status, y = Custo, fill = Status)) +
+      geom_bar(stat = "identity") +
+      labs(title = "Comparação de Custos por Status das Viagens",
+           x = "Status da Viagem", y = "Custo Total (R$)") +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   })
+<<<<<<< Updated upstream
+=======
+  
+  # Renderiza a tabela de reservas
+  output$tabela_reservas <- renderDT({
+    datatable(relatorio_data(), options = list(pageLength = 5, autoWidth = TRUE),
+              class = "display compact", rownames = FALSE)
+  })
+>>>>>>> Stashed changes
 }
