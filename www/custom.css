@@ -1,8 +1,12 @@
-/* Fundo geral do aplicativo */
 body {
   background-color: #FEF9EF !important;
+  background-image: url('luneta.png'); /* Substitua 'caminho/para' pelo caminho real da imagem */
+  background-size: 650px auto; /* Ajusta a imagem para cobrir toda a área */
+  background-repeat: no-repeat; /* Evita que a imagem se repita */
+  background-position: cover; /* Centraliza a imagem no fundo */
   color: #227C9D;
 }
+
 
 /* Centraliza o painel de login e criação de conta */
 #login_panel, #create_account_panel {
@@ -77,4 +81,37 @@ body {
 /* Texto */
 h3, h4, h5, p, label {
   color: #227C9D;
+
+/* Estilo para o título centralizado no tabItem */
+.tab-relatorios-title {
+  color: #227C9D;
+  text-align: center;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+/* Estilo para os boxes */
+.tab-relatorios-box {
+  background-color: #FEF9EF;
+  border: 1px solid #FFCB77;
+  color: #227C9D;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+/* Estilo para o botão de ação */
+.tab-relatorios-button {
+  background-color: #227C9D;
+  border-color: #227C9D;
+  color: #FFFFFF;
+}
+
+.tab-relatorios-button:hover {
+  background-color: #17C3B2;
+  border-color: #17C3B2;
+}
+
+.tab-relatorios-alert {
+  color: #FE6D73;
+  font-weight: bold;
 }
