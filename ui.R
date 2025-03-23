@@ -5,7 +5,7 @@ library(shinyalert)
 library(DT)
 
 # Tela de login
-login_page <- fluidPage(
+login_page <<- fluidPage(
   id = "login_page",
   useShinyjs(),
   tags$head(
@@ -105,13 +105,48 @@ mainBody <<- dashboardBody(
               )
             )
     ),
-    tabItem("relatorios",
-            h4("Relatórios de Viagens", style = "color: #227C9D;"),
-            br(),
-            p("Visualize relatórios das viagens realizadas e planeje futuros itinerários.",
-              style = "color: #227C9D;"),
-            plotOutput("grafico_relatorio")
+    tabItem(
+      tabName = "relatorios",
+      h4("Relatórios de Viagens", class = "tab-relatorios-title"),
+      br(),
+      fluidRow(
+        box(
+          title = "Upload de Relatórios", width = 6, solidHeader = TRUE,
+          class = "tab-relatorios-box",
+          p("Faça o upload de arquivos CSV contendo os dados das viagens e vendas."),
+          fileInput(
+            "relatorio_file", 
+            "Selecione o arquivo:", 
+            accept = ".csv", 
+            buttonLabel = "Procurar", 
+            placeholder = "Nenhum arquivo selecionado"
+          ),
+          actionButton(
+            "processar_relatorio", 
+            "Processar Relatório", 
+            class = "tab-relatorios-button"
+          ),
+          br(),
+          div(
+            textOutput("upload_message"),
+            class = "tab-relatorios-alert"
+          )
+        ),
+        box(
+          title = "Tabela de Relatórios", width = 6, solidHeader = TRUE,
+          class = "tab-relatorios-box",
+          DTOutput("tabela_reservas")
+        )
+      ),
+      fluidRow(
+        box(
+          title = "Gráfico de Relatórios", width = 12, solidHeader = TRUE,
+          class = "tab-relatorios-box",
+          plotOutput("grafico_relatorio")
+        )
+      )
     )
+    
   )
 )
 
